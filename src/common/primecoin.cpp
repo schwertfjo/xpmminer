@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <limits>
+#include <ncurses.h>
 
 #include <openssl/bn.h>
 #include <openssl/sha.h>
@@ -449,7 +450,7 @@ bool MineProbablePrimeChainFast(PrimecoinBlockHeader &header,
   sieve->Weave();
   timeMark sieveEnd = getTimeMark();  
   if (gDebug) {
-    fprintf(stderr,
+    mvprintw(3, 70,
             " * sieve %.3lfmsec: %u@%u/%u ",
             usDiff(sieveBegin, sieveEnd) / 1000.0,
             sieve->GetCandidateCount(),
@@ -470,7 +471,7 @@ bool MineProbablePrimeChainFast(PrimecoinBlockHeader &header,
     if (!sieve->GetNextCandidateMultiplier(nTriedMultiplier, nCandidateType)) {
       timeMark primalityTestEnd = getTimeMark();
       if (gDebug) {
-        fprintf(stderr,
+        mvprintw(4, 70,
                 " primality Fermat test %.3lfmsec\n",
                 usDiff(sieveEnd, primalityTestEnd) / 1000.0);
       }

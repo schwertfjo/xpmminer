@@ -356,6 +356,7 @@ void printHelpMessage()
   printf("  --extensions-num <number>: Eratosthenes sieve extensions number (default: %u)\n", gExtensionsNum);
   printf("  --primorial <number>: primorial number (default: %u)\n", gPrimorial);
   printf("  --sieve-size <number>: Eratosthenes sieve size (default: %u)\n", gSieveSize);
+  printf("  --threads <number>: num worker threads (default: %i)\n", gThreadsNum);
   printf("  --weave-depth <number>: Eratosthenes sieve weave depth (default: %u)\n", gWeaveDepth);
   printf("  --worker-id: unique identifier of your worker, used in block creation. ");
   printf("All your rigs must have different worker IDs! (default: current time value)\n");
