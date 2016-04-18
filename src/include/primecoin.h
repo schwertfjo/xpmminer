@@ -156,7 +156,8 @@ bool ProbablePrimalityTestWithTrialDivisionFast(const mpz_class &candidate,
                                                 const PrimeSource &primeSource,
                                                 CPrimalityTestParams &testParams);
 
-bool MineProbablePrimeChainFast(PrimecoinBlockHeader &header,
+bool MineProbablePrimeChainFast(void *debug,
+                                PrimecoinBlockHeader &header,
                                 CSieveOfEratosthenesL1Ext *sieve,                                
                                 mpz_class &blockHeaderHash,
                                 mpz_class &primorial,

@@ -11,7 +11,7 @@ include(CheckTypeSize)
 
 option(DEBUG_MINING_AMD_OPENCL "Print performance counters")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}-march=native -O2 -pipe -std=c++0x")
 
 if (WIN32)
   include_directories(${NCURSES_INCLUDE_DIRECTORY}/ncurses)

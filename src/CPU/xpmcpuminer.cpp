@@ -229,7 +229,8 @@ void benchmark(double difficulty)
       unsigned probableChainLength;
       unsigned testsNum;
       unsigned primeHitsNum;
-      MineProbablePrimeChainFast(header,
+      MineProbablePrimeChainFast(stderr,
+	                         header,
                                  sieve.get(),
                                  blockHeaderHash,
                                  primorial,
@@ -267,6 +268,7 @@ struct MineContext {
   uint64_t foundChains[20];
   double speed;
   WINDOW *log;
+  WINDOW *debug;  
 };
 
 void *mine(void *arg)
@@ -314,7 +316,8 @@ void *mine(void *arg)
     unsigned probableChainLength;
     unsigned testsNum;
     unsigned primeHitsNum;
-    if (MineProbablePrimeChainFast(work,
+    if (MineProbablePrimeChainFast(ctx->debug,
+                                   work,
                                    sieve.get(),
                                    blockHeaderHash,
                                    primorial,
@@ -459,12 +462,23 @@ int main(int argc, char **argv)
     benchmark(10.5);
     return 0;
   }
- 
+
+  int mx=0, my=0;
   WINDOW *display = initscr();
-  WINDOW *log = newwin(30, 160, 3 + gThreadsNum + 12, 0);
-  scrollok(log, TRUE); 
- 
-  GetBlockTemplateContext ctx(log, gUrl, gUserName, gPassword, gWallet, 4, gThreadsNum, extraNonce);
+  getmaxyx(display, mx, my);
+  int mid_col=60;
+  WINDOW *log_GBT = newwin(26, mid_col, 15 +  gThreadsNum, 0);
+  WINDOW *log = newwin(26, my-mid_col, 15 + gThreadsNum, mid_col);
+  WINDOW *debug = newwin(15 + gThreadsNum -3, my-mid_col, 3, mid_col);
+  scrollok(log, TRUE);
+  scrollok(log_GBT, TRUE);
+  scrollok(debug, TRUE);
+
+  if (gDebug)
+    wprintw(debug, " ** debug log **\n");
+  wprintw(log, " ** worker log **\n");
+  wprintw(log_GBT, " ** GetBlockTemplate log **\n");
+  GetBlockTemplateContext ctx(log_GBT, gUrl, gUserName, gPassword, gWallet, 4, gThreadsNum, extraNonce);
   ctx.run();
   
   MineContext *mineCtx = new MineContext[gThreadsNum];
@@ -477,6 +491,7 @@ int main(int argc, char **argv)
     memset(mineCtx[i].foundChains, 0, sizeof(mineCtx->foundChains));
     mineCtx[i].submit = new SubmitContext(log, gUrl, gUserName, gPassword);
     mineCtx[i].log = log;
+    mineCtx[i].debug = debug;
     pthread_create(&thread, 0, mine, &mineCtx[i]);
   }
   
@@ -533,6 +548,8 @@ int main(int argc, char **argv)
     
     wrefresh(display);
     wrefresh(log);
+    wrefresh(log_GBT);
+    wrefresh(debug);
   }
   
   return 0;

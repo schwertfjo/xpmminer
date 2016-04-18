@@ -433,7 +433,8 @@ bool ProbablePrimeChainTestFast(const mpz_class& mpzPrimeChainOrigin,
 }
 
 
-bool MineProbablePrimeChainFast(PrimecoinBlockHeader &header,
+bool MineProbablePrimeChainFast(void *debug,
+                                PrimecoinBlockHeader &header,
                                 CSieveOfEratosthenesL1Ext *sieve,
                                 mpz_class &blockHeaderHash,
                                 mpz_class &primorial,
@@ -450,7 +451,7 @@ bool MineProbablePrimeChainFast(PrimecoinBlockHeader &header,
   sieve->Weave();
   timeMark sieveEnd = getTimeMark();  
   if (gDebug) {
-    mvprintw(3, 70,
+    wprintw((WINDOW*)debug,
             " * sieve %.3lfmsec: %u@%u/%u ",
             usDiff(sieveBegin, sieveEnd) / 1000.0,
             sieve->GetCandidateCount(),
@@ -471,7 +472,7 @@ bool MineProbablePrimeChainFast(PrimecoinBlockHeader &header,
     if (!sieve->GetNextCandidateMultiplier(nTriedMultiplier, nCandidateType)) {
       timeMark primalityTestEnd = getTimeMark();
       if (gDebug) {
-        mvprintw(4, 70,
+        wprintw((WINDOW*)debug,
                 " primality Fermat test %.3lfmsec\n",
                 usDiff(sieveEnd, primalityTestEnd) / 1000.0);
       }

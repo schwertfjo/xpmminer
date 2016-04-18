@@ -117,7 +117,7 @@ void GetBlockTemplateContext::updateWork()
   }
    
    if (_height != block->height)
-     logFormattedWrite(_log, "new block detected: %u", block->height);
+     logFormattedWrite(_log, "new block detected: %u", block->height-1);
   _height = block->height;
   _difficulty = difficultyFromBits(*(uint32_t*)(&block->diffbits));
   _blockTemplateExists = true;
