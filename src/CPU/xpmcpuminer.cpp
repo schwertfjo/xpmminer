@@ -268,7 +268,8 @@ struct MineContext {
   uint64_t foundChains[20];
   double speed;
   WINDOW *log;
-  WINDOW *debug;  
+  WINDOW *debug;
+  uint32_t _nonce;  
 };
 
 void *mine(void *arg)
@@ -342,6 +343,7 @@ void *mine(void *arg)
       roundsNum = 0;
       localWorkBegin = getTimeMark();
     }
+  ctx->_nonce = work.nonce;
   }
 }
 
@@ -492,6 +494,7 @@ int main(int argc, char **argv)
     mineCtx[i].submit = new SubmitContext(log, gUrl, gUserName, gPassword);
     mineCtx[i].log = log;
     mineCtx[i].debug = debug;
+    mineCtx[i]._nonce = 0;
     pthread_create(&thread, 0, mine, &mineCtx[i]);
   }
   
@@ -532,7 +535,7 @@ int main(int argc, char **argv)
       averageSpeed += threadAvgSpeed;
       
       wmove(display, i+3, 0);
-      wprintw(display, "[%u] %.3lfG, average: %.3lfG", i+1, mineCtx[i].speed, threadAvgSpeed);
+      wprintw(display, "[%u] %.3lfG, average: %.3lfG nonce: %u", i+1, mineCtx[i].speed, threadAvgSpeed, mineCtx[i]._nonce);
     }
   
     wmove(display, gThreadsNum+3, 0);

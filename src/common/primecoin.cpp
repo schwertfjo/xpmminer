@@ -222,7 +222,7 @@ bool sha256(void *out, const void *data, size_t size)
   return true;
 }
 
-
+// Primecoin: try to find blockHeaderHash that is probable prime by switching nonce
 bool updateBlock(PrimecoinBlockHeader *header,
                  mpz_class &blockHeaderHash,
                  const PrimeSource &primeSource,
