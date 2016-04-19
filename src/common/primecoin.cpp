@@ -231,8 +231,10 @@ bool updateBlock(PrimecoinBlockHeader *header,
 {
   uint8_t hash1[32];
   uint8_t hashData[32];
-  while (header->nonce < 0xFFFF0000) {
+  while (true) {
     header->nonce += nonceIncrement;
+    if (header->nonce >= 0xFFFF0000)
+      header->nonce -= 0xFFFF0000;
     sha256(hash1, header, 80);
     sha256(hashData, hash1, 32);
     // sha256-hash must be greater than 2^255

@@ -284,7 +284,7 @@ void *mine(void *arg)
   mpz_class blockHeaderHash;
   mpz_class primorial;
   
-  const unsigned checkInterval = 8;
+  const unsigned checkInterval = 100;
   const int rnum  = rand() % 100;
   double roundSizeInGb = checkInterval*realSieveSize / 1000000000.0;
   unsigned roundsNum = 0;    
