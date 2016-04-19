@@ -351,9 +351,6 @@ bool ProbablePrimalityTestWithTrialDivisionFast(const mpz_class &candidate,
       return false;
   }
 
-  if ((candidate % 10 != 1) && (candidate % 10 != 9))
-    return false;
-
   unsigned nLength = 0;
   return FermatProbablePrimalityTestFast(candidate, nLength, testParams, true);
 }

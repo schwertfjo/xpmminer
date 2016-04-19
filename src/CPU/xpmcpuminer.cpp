@@ -14,9 +14,9 @@
 
 unsigned gDebug = 0;
 int gExtensionsNum = 9;
-int gPrimorial = 19;
+int gPrimorial = 11;
 int gSieveSize = CSieveOfEratosthenesL1Ext::L1CacheSize * 10;
-int gWeaveDepth = 8192;
+int gWeaveDepth = 512;
 int gThreadsNum = 1;
 int extraNonce = 0;
 
@@ -284,7 +284,7 @@ void *mine(void *arg)
   mpz_class blockHeaderHash;
   mpz_class primorial;
   
-  const unsigned checkInterval = 100;
+  const unsigned checkInterval = 8;
   const int rnum  = rand() % 100;
   double roundSizeInGb = checkInterval*realSieveSize / 1000000000.0;
   unsigned roundsNum = 0;    
