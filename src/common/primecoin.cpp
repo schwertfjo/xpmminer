@@ -247,8 +247,8 @@ bool updateBlock(PrimecoinBlockHeader *header,
                0,
                hashData);
     
-    if (ProbablePrimalityTestWithTrialDivisionFast(blockHeaderHash, 1000, primeSource, testParams))
-      break;
+    if (ProbablePrimalityTestWithTrialDivisionFast(blockHeaderHash, 10, primeSource, testParams))
+        break;
   }
   
   return header->nonce < 0xFFFF0000;
@@ -271,7 +271,7 @@ bool FermatProbablePrimalityTestFast(const mpz_class &n,
   static const mpz_class mpzTwo = 2;
   mpz_t& mpzE = testParams.mpzE;
   mpz_t& mpzR = testParams.mpzR;
-  
+  //fermat test 1 == 2^(p−1) mod p
   mpz_sub_ui(mpzE, n.get_mpz_t(), 1);
   mpz_powm(mpzR, mpzTwo.get_mpz_t(), mpzE, n.get_mpz_t());
   if (mpz_cmp_ui(mpzR, 1) == 0)
@@ -348,6 +348,10 @@ bool ProbablePrimalityTestWithTrialDivisionFast(const mpz_class &candidate,
     if (candidate % primeSource.prime(i) == 0)
       return false;
   }
+
+  if ((candidate % 10 != 1) && (candidate % 10 != 9))
+    return false;
+
   unsigned nLength = 0;
   return FermatProbablePrimalityTestFast(candidate, nLength, testParams, true);
 }
