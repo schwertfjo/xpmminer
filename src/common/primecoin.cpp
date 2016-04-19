@@ -249,7 +249,7 @@ bool updateBlock(PrimecoinBlockHeader *header,
                0,
                hashData);
     
-    if (ProbablePrimalityTestWithTrialDivisionFast(blockHeaderHash, 10, primeSource, testParams))
+    if (ProbablePrimalityTestWithTrialDivisionFast(blockHeaderHash, 100, primeSource, testParams))
       break;
   }
   

@@ -14,7 +14,7 @@
 
 unsigned gDebug = 0;
 int gExtensionsNum = 9;
-int gPrimorial = 11;
+int gPrimorial = 10;
 int gSieveSize = CSieveOfEratosthenesL1Ext::L1CacheSize * 10;
 int gWeaveDepth = 512;
 int gThreadsNum = 1;
