@@ -1,5 +1,5 @@
 #include "CSieveOfEratosthenesL1Ext.h"
-#include "config.h"
+//#include "config.h"
 #include "system.h"
 #include <limits>
 #include <vector>

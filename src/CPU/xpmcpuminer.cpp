@@ -312,7 +312,7 @@ void *mine(void *arg)
       testParams.bits = work.bits;
     }
 
-    if (!updateBlock(&work, blockHeaderHash, *ctx->primeSource, testParams, rnum))
+    if (!updateBlock(&work, blockHeaderHash, *ctx->primeSource, testParams, ctx->primeSource->prime(rnum)))
       continue;
     
     unsigned probableChainLength;
@@ -517,7 +517,7 @@ int main(int argc, char **argv)
   
   refresh();
   while (true) {
-    xsleep(5);  
+    xsleep(1);  
     uint64_t foundChains[MaxChainLength];
     double speed = 0.0;
     double averageSpeed = 0.0;
