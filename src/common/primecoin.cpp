@@ -222,7 +222,7 @@ bool sha256(void *out, const void *data, size_t size)
   return true;
 }
 
-// Primecoin: try to find blockHeaderHash that is probable prime by switching nonce
+// Primecoin: try to find blockHeaderHash that is probable prime
 bool updateBlock(PrimecoinBlockHeader *header,
                  mpz_class &blockHeaderHash,
                  const PrimeSource &primeSource,
@@ -264,7 +264,9 @@ void PrimorialFast(unsigned int length,
   for (size_t i = 0; i < length; i++)
     bnPrimorial *= primeSource.prime(i);
 }
-
+// Check Fermat probable primality test (2-PRP): 2 ** (n-1) = 1 (mod n)
+// true: n is probable prime
+// false: n is composite; set fractional length in the nLength output
 bool FermatProbablePrimalityTestFast(const mpz_class &n,
                                      unsigned int& nLength, 
                                      CPrimalityTestParams &testParams,
@@ -273,6 +275,7 @@ bool FermatProbablePrimalityTestFast(const mpz_class &n,
   static const mpz_class mpzTwo = 2;
   mpz_t& mpzE = testParams.mpzE;
   mpz_t& mpzR = testParams.mpzR;
+
   //fermat test 1 == 2^(p−1) mod p
   mpz_sub_ui(mpzE, n.get_mpz_t(), 1);
   mpz_powm(mpzR, mpzTwo.get_mpz_t(), mpzE, n.get_mpz_t());
@@ -290,7 +293,13 @@ bool FermatProbablePrimalityTestFast(const mpz_class &n,
   nLength = (nLength & DifficultyChainLengthMask) | fractionalLength;
   return false;
 }
-
+// Test probable primality of n = 2p +/- 1 based on Euler, Lagrange and Lifchitz
+// fSophieGermain:
+//   true:  n = 2p+1, p prime, aka Cunningham Chain of first kind
+//   false: n = 2p-1, p prime, aka Cunningham Chain of second kind
+// Return values
+//   true: n is probable prime
+//   false: n is composite; set fractional length in the nLength output
 static bool EulerLagrangeLifchitzPrimalityTestFast(const mpz_class& n,
                                                    bool fSophieGermain,
                                                    unsigned int& nLength,
@@ -340,7 +349,10 @@ static bool EulerLagrangeLifchitzPrimalityTestFast(const mpz_class& n,
   nLength = (nLength & DifficultyChainLengthMask) | nFractionalLength;
   return false;
 }
-
+// Perform Fermat test with trial division
+// Return values:
+//   true  - passes trial division test and Fermat test; probable prime
+//   false - failed either trial division or Fermat test; composite
 bool ProbablePrimalityTestWithTrialDivisionFast(const mpz_class &candidate,
                                                 unsigned trialDivisionLimit,
                                                 const PrimeSource &primeSource,

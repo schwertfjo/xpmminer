@@ -14,9 +14,9 @@
 
 unsigned gDebug = 0;
 int gExtensionsNum = 9;
-int gPrimorial = 10;
+int gPrimorial = 19;
 int gSieveSize = CSieveOfEratosthenesL1Ext::L1CacheSize * 10;
-int gWeaveDepth = 512;
+int gWeaveDepth = 8192;
 int gThreadsNum = 1;
 int extraNonce = 0;
 
@@ -68,6 +68,14 @@ void sieveL1ExtBenchmark(double difficulty)
   const unsigned HpSieveL1CacheSize = 220400;        
         
   PrimeSource primeSource(1000000, gWeaveDepth);
+//  for (int i = 0; i < 50; ++i) {
+//    fprintf(stderr, "%u Prime: %u, Combined: %u, Multiplier: %u, Offset: %u \n",
+//	    i,
+//	    primeSource[i],
+//	    primeSource.primesCombined(i),
+//	    primeSource.combinedMultiplier(i),
+//	    primeSource.combinedOffset(i));
+//  }
   CPrimalityTestParams testParams(bitsFromDifficulty(difficulty));
   
   PrimecoinBlockHeader header;
@@ -84,18 +92,14 @@ void sieveL1ExtBenchmark(double difficulty)
   fixedMultiplier = primorial * blockHeaderHash;
   for (unsigned i = 1; i <= 8; i++) {
     unsigned sieveSize = CSieveOfEratosthenesL1Ext::L1CacheSize*2*i;
-    unsigned realSieveSize =
-      sieveSize + sieveSize/2*CSieveOfEratosthenesL1Ext::ExtensionsNum;
+    unsigned realSieveSize =sieveSize + sieveSize/2*CSieveOfEratosthenesL1Ext::ExtensionsNum;
       
-      // Fast checking CSieveOfEratosthenesL1Ext output
+    // Fast checking CSieveOfEratosthenesL1Ext output
     {
-      std::unique_ptr<CSieveOfEratosthenesL1Ext> l1ext(
-        new CSieveOfEratosthenesL1Ext(primeSource));
-      std::unique_ptr<CSieveOfEratosthenesHp> hp(
-        new CSieveOfEratosthenesHp(primeSource));
+      std::unique_ptr<CSieveOfEratosthenesL1Ext> l1ext(new CSieveOfEratosthenesL1Ext(primeSource));
+      std::unique_ptr<CSieveOfEratosthenesHp> hp(new CSieveOfEratosthenesHp(primeSource));
       l1ext->reset(sieveSize, (unsigned)difficulty, gWeaveDepth, fixedMultiplier);      
-      hp->Reset(sieveSize, gWeaveDepth, HpSieveExtensionsNum, HpSieveL1CacheSize,
-                header.bits, blockHeaderHash, primorial, 0);
+      hp->Reset(sieveSize, gWeaveDepth, HpSieveExtensionsNum, HpSieveL1CacheSize,header.bits, blockHeaderHash, primorial, 0);
       l1ext->Weave();
       hp->Weave();
       if (l1ext->GetCandidateCount() != hp->GetCandidateCount() || !l1ext->fastSelfTest()) {
@@ -149,48 +153,50 @@ void fermatTestBenchmark(double difficulty)
   mpz_class fixedMultiplier;
   generateRandomHeader(&header, difficulty);
 
-  while (updateBlock(&header, blockHeaderHash, primeSource, testParams)) {
-    PrimorialFast(gPrimorial, primorial, primeSource);
-    fixedMultiplier = primorial * blockHeaderHash;
+  for ( int i; i < 10; ++i) { 
+    if (updateBlock(&header, blockHeaderHash, primeSource, testParams)) {
+      PrimorialFast(gPrimorial, primorial, primeSource);
+      fixedMultiplier = primorial * blockHeaderHash;
 
-    std::vector<mpz_class> primesForTest;    
-    std::unique_ptr<CSieveOfEratosthenesL1Ext> sieve(
-      new CSieveOfEratosthenesL1Ext(primeSource));
-    sieve->reset(gSieveSize, (unsigned)difficulty, gWeaveDepth, fixedMultiplier);
-    sieve->Weave();
-    sieve->resetCandidateIterator();
+      std::vector<mpz_class> primesForTest;    
+      std::unique_ptr<CSieveOfEratosthenesL1Ext> sieve(
+        new CSieveOfEratosthenesL1Ext(primeSource));
+      sieve->reset(gSieveSize, (unsigned)difficulty, gWeaveDepth, fixedMultiplier);
+      sieve->Weave();
+      sieve->resetCandidateIterator();
       
-    mpz_class prime;
-    unsigned testsNum = 0;
-    unsigned multiplier;
-    unsigned candidateType;
+      mpz_class prime;
+      unsigned testsNum = 0;
+      unsigned multiplier;
+      unsigned candidateType;
 
-    while (sieve->GetNextCandidateMultiplier(multiplier, candidateType)) {
-      prime = fixedMultiplier;
-      prime *= multiplier;
-      if (candidateType == PRIME_CHAIN_CUNNINGHAM1 ||
-          candidateType == PRIME_CHAIN_BI_TWIN) {
-        primesForTest.push_back(prime-1);
+      while (sieve->GetNextCandidateMultiplier(multiplier, candidateType)) {
+        prime = fixedMultiplier;
+        prime *= multiplier;
+        if (candidateType == PRIME_CHAIN_CUNNINGHAM1 ||
+            candidateType == PRIME_CHAIN_BI_TWIN) {
+          primesForTest.push_back(prime-1);
+        }
+      
+        if (candidateType == PRIME_CHAIN_CUNNINGHAM2 ||
+            candidateType == PRIME_CHAIN_BI_TWIN) {
+          primesForTest.push_back(prime+1);
+        }      
       }
-      
-      if (candidateType == PRIME_CHAIN_CUNNINGHAM2 ||
-          candidateType == PRIME_CHAIN_BI_TWIN) {
-        primesForTest.push_back(prime+1);
-      }      
-    }
     
-    timeMark beginPoint = getTimeMark();
-    for (size_t i = 0; i < primesForTest.size(); i++) {
-      unsigned chainLength;
-      FermatProbablePrimalityTestFast(primesForTest[i], chainLength, testParams);
-    }
-    uint64_t testTime = usDiff(beginPoint, getTimeMark());
+      timeMark beginPoint = getTimeMark();
+      for (size_t i = 0; i < primesForTest.size(); i++) {
+        unsigned chainLength;
+        FermatProbablePrimalityTestFast(primesForTest[i], chainLength, testParams);
+      }
+      uint64_t testTime = usDiff(beginPoint, getTimeMark());
     
-    fprintf(stderr,
-            " %u Fermat tests at %.3lfms, speed: %.3lf tests/second\n",
-            (unsigned)primesForTest.size(),
-            testTime / 1000.0,
-            1000000.0 / testTime * primesForTest.size());
+      fprintf(stderr,
+              " %u Fermat tests at %.3lfms, speed: %.3lf tests/second\n",
+              (unsigned)primesForTest.size(),
+              testTime / 1000.0,
+              1000000.0 / testTime * primesForTest.size());
+    }  
   }
 }
 
@@ -460,8 +466,8 @@ int main(int argc, char **argv)
     extraNonce = time(0);
 
   if (isBenchmark) {
-    fermatTestBenchmark(10.5);
     sieveL1ExtBenchmark(10.5);
+    fermatTestBenchmark(10.5);
     benchmark(10.5);
     return 0;
   }

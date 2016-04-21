@@ -1,5 +1,23 @@
+// Sieve of Eratosthenes for proof-of-work mining
+//
+// Includes the sieve extension feature from jhPrimeminer by jh000
+//
+// Layer k of the sieve determines whether numbers of the form
+// hash * primorial * candidate * 2^k - 1 and
+// hash * primorial * candidate * 2^k + 1
+// are known to be composites.
+//
+// The default sieve is composed of layers 1 .. nChainLength. The multipliers
+// in the default sieve are all odd.
+//
+// An extension i is composed of layers i .. i + nChainLength. The candidates
+// indexes from the extensions are multiplied by 2^i. Therefore, the resulting
+// multipliers are always even.
+//
+// The larger numbers in the extensions have a slightly smaller probability of
+// being primes and take slightly longer to test but they can be calculated very
+// efficiently because the layers overlap.
 #include "CSieveOfEratosthenesL1Ext.h"
-//#include "config.h"
 #include "system.h"
 #include <limits>
 #include <vector>
@@ -14,7 +32,7 @@ static inline unsigned calculateOffset(unsigned lowIdx,
     lowIdx + (currentPrime - currentPrimeMod) + offset;
 }
 
-// Extended Euclidian algorithm, get inverse modulo
+// Extended Euclidean algorithm to calculate the inverse of a in finite field defined by nPrime
 static unsigned intInvert(unsigned a, unsigned mod)
 {
   int rem0 = mod, rem1 = a % mod, rem2;
@@ -80,7 +98,7 @@ void CSieveOfEratosthenesL1Ext::reset(unsigned sieveSize,
                                       unsigned depth,
                                       const mpz_class &fixedMultiplier)
 {
-  size_t limbsNumber;
+//  size_t limbsNumber;
   this->nSieveSize = sieveSize;
   this->chainLength = chainLength;
   this->depth = depth;
@@ -107,10 +125,14 @@ unsigned int CSieveOfEratosthenesL1Ext::GetCandidateCount()
   for (unsigned i = 0; i < sieveWords; i++) {
     uint64_t value =
       ~(cunningham1Bitfield[i] & cunningham2Bitfield[i] & bitwinBitfield[i]);
-    if (!value)
-      continue;
-    for (unsigned j = 0; j < 64; j++, value >>= 1)
+    while(value) {
       candidateCount += (value & 0x1);
+      value >>= 1;
+    }
+//    if (!value)
+//      continue;
+//    for (unsigned j = 0; j < 64; j++, value >>= 1)
+//      candidateCount += (value & 0x1);
   }  
   
   // Extensions
@@ -121,10 +143,14 @@ unsigned int CSieveOfEratosthenesL1Ext::GetCandidateCount()
     for (unsigned i = 0; i < sieveWords/2; i++) {
       uint64_t value =
         ~(extCunningham1[i]) | (~extCunningham2[i]) | (~extBitwin[i]);
-      if (!value)
-        continue;
-      for (unsigned j = 0; j < 64; j++, value >>= 1)
-        candidateCount += (value & 0x1);
+    while(value) {
+      candidateCount += (value & 0x1);
+      value >>= 1;
+    }
+//      if (!value)
+//        continue;
+//      for (unsigned j = 0; j < 64; j++, value >>= 1)
+//        candidateCount += (value & 0x1);
     }
     
     extCunningham1 += sieveWords;

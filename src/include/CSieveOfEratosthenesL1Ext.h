@@ -18,7 +18,7 @@ private:
   unsigned chainLength; // target of the prime chain to search for
   unsigned depth;
   unsigned layersNum;
-  uint32_t fixedFactor[256];
+  uint32_t fixedFactor[256];  // primorial * blockHeaderHash
   
   // bit maps of the sieve, index represents the variable part of multiplier
   uint64_t cunningham1Bitfield[(ExtensionsNum+1)*(MaxSieveSize/64)];
