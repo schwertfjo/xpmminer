@@ -130,7 +130,7 @@ int OpenCLInit(OpenCLPlatrormContext &ctx,
   
   cmdLine.append("-I");
   cmdLine.append(installPrefix());
-  cmdLine.append("/share/xpmminer");
+  cmdLine.append("./");
   cmdLine.push_back(' ');
   
   for (size_t i = 0; i < sizeof(arguments) / sizeof(cmdLineArg); i++) {

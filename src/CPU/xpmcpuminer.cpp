@@ -15,7 +15,8 @@
 unsigned gDebug = 0;
 int gExtensionsNum = 9;
 int gPrimorial = 19;
-int gSieveSize = CSieveOfEratosthenesL1Ext::L1CacheSize * 10;
+int gSieveSizeX = 10;
+int gSieveSize = CSieveOfEratosthenesL1Ext::L1CacheSize * gSieveSizeX;
 int gWeaveDepth = 8192;
 int gThreadsNum = 1;
 int extraNonce = 0;
@@ -51,7 +52,7 @@ void initCmdLineOptions(option *options)
   options[clBenchmark] = {"benchmark", no_argument, 0, 'b'};
   options[clExtensionsNum] = {"extensions-num", required_argument, &gExtensionsNum, 0};  
   options[clPrimorial] = {"primorial", required_argument, &gPrimorial, 0};
-  options[clSieveSize] = {"sieve-size", required_argument, &gSieveSize, 0};
+  options[clSieveSize] = {"sieve-size", required_argument, &gSieveSizeX, 0};
   options[clWeaveDepth] = {"weave-depth", required_argument, &gWeaveDepth, 0};
   options[clUrl] = {"url", required_argument, 0, 'o'};
   options[clUser] = {"user", required_argument, 0, 'u'};
@@ -68,14 +69,14 @@ void sieveL1ExtBenchmark(double difficulty)
   const unsigned HpSieveL1CacheSize = 220400;        
         
   PrimeSource primeSource(1000000, gWeaveDepth);
-//  for (int i = 0; i < 50; ++i) {
-//    fprintf(stderr, "%u Prime: %u, Combined: %u, Multiplier: %u, Offset: %u \n",
-//	    i,
-//	    primeSource[i],
-//	    primeSource.primesCombined(i),
-//	    primeSource.combinedMultiplier(i),
-//	    primeSource.combinedOffset(i));
-//  }
+  for (int i = 0; i < 50; ++i) {
+     printf("%u Prime: %u, Combined: %u, Multiplier: %lu, Offset: %u \n",
+	    i,
+	    primeSource[i],
+	    primeSource.primesCombined(i),
+	    primeSource.combinedMultiplier(i),
+	    primeSource.combinedOffset(i));
+  }
   CPrimalityTestParams testParams(bitsFromDifficulty(difficulty));
   
   PrimecoinBlockHeader header;
@@ -367,7 +368,7 @@ void printHelpMessage()
   printf("  --debug: show additional mining information\n");
   printf("  --extensions-num <number>: Eratosthenes sieve extensions number (default: %u)\n", gExtensionsNum);
   printf("  --primorial <number>: primorial number (default: %u)\n", gPrimorial);
-  printf("  --sieve-size <number>: Eratosthenes sieve size (default: %u)\n", gSieveSize);
+  printf("  --sieve-size <number>: Eratosthenes sieve size factor (default: %u max: %u)\n", gSieveSizeX, CSieveOfEratosthenesL1Ext::MaxSieveSize / CSieveOfEratosthenesL1Ext::L1CacheSize);
   printf("  --threads <number>: num worker threads (default: %i)\n", gThreadsNum);
   printf("  --weave-depth <number>: Eratosthenes sieve weave depth (default: %u)\n", gWeaveDepth);
   printf("  --worker-id: unique identifier of your worker, used in block creation. ");
@@ -399,12 +400,14 @@ int main(int argc, char **argv)
             gPrimorial = atoi(optarg);
             break;
           case clSieveSize :
-            gSieveSize = atoi(optarg);
-            if (gSieveSize > CSieveOfEratosthenesL1Ext::MaxSieveSize) {
+            gSieveSizeX = atoi(optarg);
+            if (gSieveSizeX > CSieveOfEratosthenesL1Ext::MaxSieveSize / CSieveOfEratosthenesL1Ext::L1CacheSize) {
               fprintf(stderr, "Sieve size limited by %u, you try launch with %u\n",
-                      CSieveOfEratosthenesL1Ext::MaxSieveSize, gSieveSize);
+                      CSieveOfEratosthenesL1Ext::MaxSieveSize / CSieveOfEratosthenesL1Ext::L1CacheSize, gSieveSizeX);
               exit(1);
             }
+            else
+              gSieveSize = gSieveSizeX * CSieveOfEratosthenesL1Ext::L1CacheSize;
             break;
           case clWeaveDepth :
             gWeaveDepth = atoi(optarg);
@@ -475,9 +478,9 @@ int main(int argc, char **argv)
   int mx=0, my=0;
   WINDOW *display = initscr();
   getmaxyx(display, mx, my);
-  int mid_col=60;
-  WINDOW *log_GBT = newwin(26, mid_col, 15 +  gThreadsNum, 0);
-  WINDOW *log = newwin(26, my-mid_col, 15 + gThreadsNum, mid_col);
+  int mid_col = 60;
+  WINDOW *log_GBT = newwin(mx - (15 +  gThreadsNum), mid_col, 15 +  gThreadsNum, 0);
+  WINDOW *log = newwin(mx - (15 +  gThreadsNum), my-mid_col, 15 + gThreadsNum, mid_col);
   WINDOW *debug = newwin(15 + gThreadsNum -3, my-mid_col, 3, mid_col);
   scrollok(log, TRUE);
   scrollok(log_GBT, TRUE);
@@ -523,14 +526,14 @@ int main(int argc, char **argv)
   
   refresh();
   while (true) {
-    xsleep(1);  
+    xsleep(5);  
     uint64_t foundChains[MaxChainLength];
     double speed = 0.0;
     double averageSpeed = 0.0;
     memset(foundChains, 0, sizeof(foundChains));
     
     wmove(display, 1, 0);
-    wprintw(display, " ** block: %u, difficulty: %.3lf", ctx.getBlockHeight(), ctx.getDifficulty());
+    wprintw(display, " ** block: %u, difficulty: %.6lf", ctx.getBlockHeight(), ctx.getDifficulty());
     timeMark currentPoint = getTimeMark();    
     uint64_t elapsedTime = usDiff(workBeginPoint, currentPoint);
     for (int i = 0; i < gThreadsNum; i++) {

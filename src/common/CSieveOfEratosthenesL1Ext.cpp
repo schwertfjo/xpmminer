@@ -129,10 +129,6 @@ unsigned int CSieveOfEratosthenesL1Ext::GetCandidateCount()
       candidateCount += (value & 0x1);
       value >>= 1;
     }
-//    if (!value)
-//      continue;
-//    for (unsigned j = 0; j < 64; j++, value >>= 1)
-//      candidateCount += (value & 0x1);
   }  
   
   // Extensions
@@ -143,14 +139,10 @@ unsigned int CSieveOfEratosthenesL1Ext::GetCandidateCount()
     for (unsigned i = 0; i < sieveWords/2; i++) {
       uint64_t value =
         ~(extCunningham1[i]) | (~extCunningham2[i]) | (~extBitwin[i]);
-    while(value) {
-      candidateCount += (value & 0x1);
-      value >>= 1;
-    }
-//      if (!value)
-//        continue;
-//      for (unsigned j = 0; j < 64; j++, value >>= 1)
-//        candidateCount += (value & 0x1);
+      while(value) {
+        candidateCount += (value & 0x1);
+        value >>= 1;
+      }
     }
     
     extCunningham1 += sieveWords;

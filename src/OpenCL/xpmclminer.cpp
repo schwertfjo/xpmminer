@@ -1,7 +1,6 @@
 #include "CSieveOfEratosthenesL1Ext.h"
 #include "Debug.h"
 #include "benchmarks.h"
-#include "config.h"
 #include "getblocktemplate.h"
 #include "primecoin.h"
 #include "system.h"

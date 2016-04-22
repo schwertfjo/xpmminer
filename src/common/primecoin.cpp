@@ -467,7 +467,7 @@ bool MineProbablePrimeChainFast(void *debug,
   timeMark sieveEnd = getTimeMark();  
   if (gDebug) {
     wprintw((WINDOW*)debug,
-            " * sieve %.3lfmsec: %u@%u/%u ",
+            "sieve  %.3lfmsec: %u possibleChains@%usieveSize/%usieveDepth\n",
             usDiff(sieveBegin, sieveEnd) / 1000.0,
             sieve->GetCandidateCount(),
             gSieveSize,
@@ -488,8 +488,10 @@ bool MineProbablePrimeChainFast(void *debug,
       timeMark primalityTestEnd = getTimeMark();
       if (gDebug) {
         wprintw((WINDOW*)debug,
-                " primality Fermat test %.3lfmsec\n",
-                usDiff(sieveEnd, primalityTestEnd) / 1000.0);
+                "fermat %.3lfmsec: %i primeTests/%iprimeHits\n",
+                usDiff(sieveEnd, primalityTestEnd) / 1000.0,
+	        nTests,
+	        nPrimesHit);
       }
       
       return false;
