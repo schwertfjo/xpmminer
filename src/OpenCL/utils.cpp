@@ -129,8 +129,8 @@ int OpenCLInit(OpenCLPlatrormContext &ctx,
   std::string cmdLine;
   
   cmdLine.append("-I");
-  cmdLine.append(installPrefix());
-  cmdLine.append("./");
+  //cmdLine.append(installPrefix());
+  cmdLine.append("gpu/include");
   cmdLine.push_back(' ');
   
   for (size_t i = 0; i < sizeof(arguments) / sizeof(cmdLineArg); i++) {
@@ -150,7 +150,7 @@ int OpenCLInit(OpenCLPlatrormContext &ctx,
   if (strcmp(targetPlatformName, "Advanced Micro Devices, Inc.") == 0)
     cmdLine.append("-save-temps");
       
-  const char *kernelFile = buildPath(PtData, "kernel.cl");
+  const char *kernelFile = "gpu/kernel.cl";
         
   // OpenCL preparing
   cl_int clResult;  

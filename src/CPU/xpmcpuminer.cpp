@@ -282,8 +282,7 @@ struct MineContext {
 void *mine(void *arg)
 {
   MineContext *ctx = (MineContext*)arg;
-  unsigned realSieveSize =
-    gSieveSize + gSieveSize/2*CSieveOfEratosthenesL1Ext::ExtensionsNum;  
+  unsigned realSieveSize = gSieveSize + gSieveSize/2*CSieveOfEratosthenesL1Ext::ExtensionsNum;  
 
   blktemplate_t *workTemplate = 0;
   PrimecoinBlockHeader work;
@@ -292,7 +291,7 @@ void *mine(void *arg)
   mpz_class primorial;
   
   const unsigned checkInterval = 8;
-  const int rnum  = rand() % 100;
+  const int rnum  = (rand() % 100) * (ctx->threadIdx + 1);
   double roundSizeInGb = checkInterval*realSieveSize / 1000000000.0;
   unsigned roundsNum = 0;    
   
@@ -321,6 +320,8 @@ void *mine(void *arg)
 
     if (!updateBlock(&work, blockHeaderHash, *ctx->primeSource, testParams, ctx->primeSource->prime(rnum)))
       continue;
+
+    ctx->_nonce = work.nonce;
     
     unsigned probableChainLength;
     unsigned testsNum;
@@ -351,7 +352,6 @@ void *mine(void *arg)
       roundsNum = 0;
       localWorkBegin = getTimeMark();
     }
-  ctx->_nonce = work.nonce;
   }
 }
 
