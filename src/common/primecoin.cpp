@@ -556,10 +556,11 @@ bool MineProbablePrimeChainFast(void *debug,
       timeMark primalityTestEnd = getTimeMark();
       if (gDebug) {
         wprintw((WINDOW*)debug,
-                "fermat %.3lfmsec: %i primeTests/%iprimeHits\n",
+                "fermat %.3lfmsec: %i primeTests/%iprimeHits %.0lf tests/sec\n",
                 usDiff(sieveEnd, primalityTestEnd) / 1000.0,
 	        nTests,
-	        nPrimesHit);
+	        nPrimesHit,
+	        ((double)nTests / (usDiff(sieveEnd, primalityTestEnd) / 1000.0)) * 1000.0);
       }
       
       return false;
