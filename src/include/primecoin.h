@@ -7,6 +7,7 @@
 
 #include "gmpxx.h"
 
+
 static const uint32_t DifficultyFractionalBits = 24;
 static const uint32_t DifficultyFractionalMask = (1U << DifficultyFractionalBits) - 1;
 static const uint32_t DifficultyChainLengthMask = ~DifficultyFractionalMask;
@@ -112,12 +113,17 @@ bool sha256(void *out, const void *data, size_t size);
 class CSieveOfEratosthenesL1Ext;
 
 struct CPrimalityTestParams {
-  mpz_t mpzE;
-  mpz_t mpzR;
-  mpz_t mpzRplusOne;
+  mpz_class mpzE;
+  mpz_class mpzR;
+//  mpz_t mpzRplusOne;
   
+  mpz_class mpzNMinusOne;
+  mpz_class mpzBase;
+  mpz_class mpzR2;
+  mpz_class mpzFrac;
   mpz_class mpzOriginMinusOne;
   mpz_class mpzOriginPlusOne;
+  mpz_class mpzN;
   mpz_class N;
   
   unsigned int bits;
@@ -127,15 +133,15 @@ struct CPrimalityTestParams {
   CPrimalityTestParams(unsigned int difficultyBits) {
     bits = difficultyBits;
     chainLength = 0;
-    mpz_init(mpzE);
-    mpz_init(mpzR);
-    mpz_init(mpzRplusOne);
+//    mpz_init(mpzE);
+//    mpz_init(mpzR);
+//    mpz_init(mpzRplusOne);
   }
   
   ~CPrimalityTestParams() {
-    mpz_clear(mpzE);
-    mpz_clear(mpzR);
-    mpz_clear(mpzRplusOne);
+//    mpz_clear(mpzE);
+//    mpz_clear(mpzR);
+//    mpz_clear(mpzRplusOne);
   }
 };
 
