@@ -417,11 +417,19 @@ bool ProbablePrimalityTestWithTrialDivisionFast(const mpz_class &candidate,
 //   false - Not Cunningham Chain
 static bool ProbableCunninghamChainTestFast(const mpz_class& n,
                                             bool fSophieGermain,
-                                            //bool fFermatTest,
                                             unsigned int& nProbableChainLength,
                                             CPrimalityTestParams& testParams)
 {
   nProbableChainLength = 0;
+  unsigned int length = chainLengthFromBits(testParams.bits);
+  mpz_class tmp = n; 
+  for (unsigned int i=0; i < length; i++)
+  {
+    tmp <<= 1;
+    tmp += (fSophieGermain? 1 : (-1));
+  }
+  if (!FermatProbablePrimalityTestFast(tmp, nProbableChainLength, testParams, true))
+    return false;
 
   // Fermat test for n first
   if (!FermatProbablePrimalityTestFast(n, nProbableChainLength, testParams, true))
@@ -435,7 +443,7 @@ static bool ProbableCunninghamChainTestFast(const mpz_class& n,
     incrementChainLengthInBits(&nProbableChainLength);
     N <<= 1;
     N += (fSophieGermain? 1 : (-1));
-    bool fFastFail = nChainSeq < 4;
+    bool fFastFail = nChainSeq < length;
     if (!EulerLagrangeLifchitzPrimalityTestFast(N, fSophieGermain, nProbableChainLength, testParams, fFastFail))
       break;
   }
@@ -566,8 +574,8 @@ bool MineProbablePrimeChainFast(void *debug,
       return false;
     }
     
-    bnChainOrigin = hashMultiplier;
-    bnChainOrigin *= nTriedMultiplier;
+    // hashMultiplier = blockHeaderHash * primorial
+    bnChainOrigin = hashMultiplier * nTriedMultiplier;
     nChainLength = 0;
     if (ProbablePrimeChainTestFast(bnChainOrigin, testParams)) {
       uint8_t buffer[256];

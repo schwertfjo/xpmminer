@@ -490,7 +490,7 @@ int main(int argc, char **argv)
     wprintw(debug, " ** debug log **\n");
   wprintw(log, " ** worker log **\n");
   wprintw(log_GBT, " ** GetBlockTemplate log **\n");
-  GetBlockTemplateContext ctx(log_GBT, gUrl, gUserName, gPassword, gWallet, 4, gThreadsNum, extraNonce);
+  GetBlockTemplateContext ctx(log_GBT, gUrl, gUserName, gPassword, gWallet, 2, gThreadsNum, extraNonce);
   ctx.run();
   
   MineContext *mineCtx = new MineContext[gThreadsNum];

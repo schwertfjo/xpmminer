@@ -115,7 +115,7 @@ class CSieveOfEratosthenesL1Ext;
 struct CPrimalityTestParams {
   mpz_class mpzE;
   mpz_class mpzR;
-//  mpz_t mpzRplusOne;
+//  mpz_class mpzRplusOne;
   
   mpz_class mpzNMinusOne;
   mpz_class mpzBase;
