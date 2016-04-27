@@ -291,7 +291,6 @@ void *mine(void *arg)
   mpz_class primorial;
   
   const unsigned checkInterval = 8;
-  const int rnum  = (rand() % 100) * (ctx->threadIdx + 1);
   double roundSizeInGb = checkInterval*realSieveSize / 1000000000.0;
   unsigned roundsNum = 0;    
   
@@ -318,8 +317,8 @@ void *mine(void *arg)
       testParams.bits = work.bits;
     }
 
-    if (!updateBlock(&work, blockHeaderHash, *ctx->primeSource, testParams, ctx->primeSource->prime(rnum)))
-      continue;
+      if (!updateBlock(&work, blockHeaderHash, *ctx->primeSource, testParams, ctx->primeSource->prime(ctx->threadIdx + 1)))
+        continue;
 
     ctx->_nonce = work.nonce;
     

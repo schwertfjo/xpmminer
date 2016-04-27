@@ -421,7 +421,7 @@ static bool ProbableCunninghamChainTestFast(const mpz_class& n,
                                             CPrimalityTestParams& testParams)
 {
   nProbableChainLength = 0;
-  unsigned int length = chainLengthFromBits(testParams.bits);
+  unsigned int length = chainLengthFromBits(testParams.bits) - 1;
   mpz_class tmp = n; 
   for (unsigned int i=0; i < length; i++)
   {
